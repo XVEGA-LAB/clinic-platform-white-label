@@ -14,6 +14,7 @@ var bookingState = {
     appointmentId: null,
     isTransitioning: false,
     availableDates: {},
+    maintenanceMessages: {},
     paymentMethod: null // 'yape' | 'presencial'
 };
 
@@ -443,8 +444,10 @@ async function renderCalendar() {
         const result = await response.json();
         if (result.success) {
             bookingState.availableDates = {};
+            bookingState.maintenanceMessages = {};
             result.data.forEach(function (day) {
                 bookingState.availableDates[day.date] = day.hasSlots;
+                bookingState.maintenanceMessages[day.date] = day.maintenanceMessage || null;
             });
         }
     } catch (error) {
@@ -470,6 +473,8 @@ async function renderCalendar() {
         var dayDate = new Date(year, month, d);
         var dateStr = formatDate(dayDate);
         var isPast = dayDate < today;
+        var maintenanceMessage = bookingState.maintenanceMessages[dateStr];
+        var isMaintenanceDate = !!maintenanceMessage;
         var hasAvailability = bookingState.availableDates[dateStr] === true;
         var isSelected = bookingState.selectedDate &&
             bookingState.selectedDate.getDate() === d &&
@@ -481,10 +486,13 @@ async function renderCalendar() {
 
         var btn = document.createElement("button");
         btn.textContent = d;
-        btn.disabled = isPast || !hasAvailability;
+        btn.disabled = isPast || !hasAvailability || isMaintenanceDate;
 
-        if (isPast || !hasAvailability) {
+        if (isPast || !hasAvailability || isMaintenanceDate) {
             btn.className = "w-full aspect-square max-w-[36px] md:max-w-[44px] rounded-full flex items-center justify-center text-[11px] md:text-sm font-bold text-slate-300 cursor-not-allowed";
+            if (isMaintenanceDate) {
+                btn.title = maintenanceMessage;
+            }
         } else if (isSelected) {
             btn.className = "w-full aspect-square max-w-[36px] md:max-w-[44px] rounded-full flex items-center justify-center text-[11px] md:text-sm font-bold bg-[#dd4d4d] text-white shadow-md shadow-red-500/30";
         } else {
@@ -613,10 +621,18 @@ async function renderTimeSlots() {
         weekday: "long", month: "long", day: "numeric"
     });
 
+    var dateStr = formatDate(bookingState.selectedDate);
+    var maintenanceMessage = bookingState.maintenanceMessages[dateStr];
+
+    if (maintenanceMessage) {
+        list.innerHTML = '<div class="rounded-xl border border-amber-200 bg-amber-50 px-3 py-4 text-center text-sm text-amber-800 font-medium">' + maintenanceMessage + '</div>';
+        updateStep1Button();
+        return;
+    }
+
     list.innerHTML = '<div class="text-center py-4"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#dd4d4d] mx-auto"></div></div>';
 
     try {
-        var dateStr = formatDate(bookingState.selectedDate);
         const response = await fetch(
             CONFIG.apiUrl + '/book/' + CONFIG.doctorSlug + '/slots?date=' + dateStr
         );
