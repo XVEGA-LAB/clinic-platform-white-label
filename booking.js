@@ -19,6 +19,13 @@ var bookingState = {
 };
 
 var MONTH_NAMES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
+var TRAINING_START_DATE = '2026-08-10';
+var TRAINING_END_DATE = '2026-08-23';
+var TRAINING_MESSAGE = 'Estaré en capacitación del 10 al 23 de agosto. Durante este tiempo, los horarios de atención estarán momentáneamente suspendidos. Gracias por tu comprensión.';
+
+function isTrainingDate(dateStr) {
+    return dateStr >= TRAINING_START_DATE && dateStr <= TRAINING_END_DATE;
+}
 
 function resetBookingActionButtons() {
     var yapeBtn = document.querySelector('button[onclick="sendYapeWhatsApp()"]');
@@ -473,7 +480,9 @@ async function renderCalendar() {
         var dayDate = new Date(year, month, d);
         var dateStr = formatDate(dayDate);
         var isPast = dayDate < today;
-        var maintenanceMessage = bookingState.maintenanceMessages[dateStr];
+        var maintenanceMessage = isTrainingDate(dateStr)
+            ? TRAINING_MESSAGE
+            : bookingState.maintenanceMessages[dateStr];
         var isMaintenanceDate = !!maintenanceMessage;
         var hasAvailability = bookingState.availableDates[dateStr] === true;
         var isSelected = bookingState.selectedDate &&
@@ -622,7 +631,9 @@ async function renderTimeSlots() {
     });
 
     var dateStr = formatDate(bookingState.selectedDate);
-    var maintenanceMessage = bookingState.maintenanceMessages[dateStr];
+    var maintenanceMessage = isTrainingDate(dateStr)
+            ? TRAINING_MESSAGE
+            : bookingState.maintenanceMessages[dateStr];
 
     if (maintenanceMessage) {
         list.innerHTML = '<div class="rounded-xl border border-amber-200 bg-amber-50 px-3 py-4 text-center text-sm text-amber-800 font-medium">' + maintenanceMessage + '</div>';
