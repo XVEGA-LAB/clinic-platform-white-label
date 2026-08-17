@@ -20,8 +20,8 @@ var bookingState = {
 
 var MONTH_NAMES = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
 var TRAINING_START_DATE = '2026-08-10';
-var TRAINING_END_DATE = '2026-08-23';
-var TRAINING_MESSAGE = 'Estaré en capacitación del 10 al 23 de agosto. Durante este tiempo, los horarios de atención estarán momentáneamente suspendidos. Gracias por tu comprensión.';
+var TRAINING_END_DATE = '2026-08-16';
+var TRAINING_MESSAGE = 'Atención temporalmente suspendida del 10 al 16 de agosto por capacitación.';
 
 function isTrainingDate(dateStr) {
     return dateStr >= TRAINING_START_DATE && dateStr <= TRAINING_END_DATE;
